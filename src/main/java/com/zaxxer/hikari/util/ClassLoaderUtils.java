@@ -24,75 +24,60 @@ import java.util.Set;
  *
  * @author Brett Wooldridge
  */
-public final class ClassLoaderUtils
-{
+public final class ClassLoaderUtils {
     /**
      * Get the class loader which can be used to generate proxies without leaking memory.
+     *
      * @return the class loader which can be used to generate proxies without leaking memory.
      */
-    public static ClassLoader getClassLoader()
-    {
+    public static ClassLoader getClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl != null)
-        {
+        if (cl != null) {
             return new CascadingClassLoader(cl);
         }
         return ClassLoaderUtils.class.getClassLoader();
     }
 
-    public static Class<?> loadClass(String className) throws ClassNotFoundException
-    {
+    public static Class<?> loadClass(String className) throws ClassNotFoundException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl != null)
-        {
+        if (cl != null) {
             return new CascadingClassLoader(cl).loadClass(className);
         }
 
         return Class.forName(className);
     }
 
-    public static Set<Class<?>> getAllInterfaces(Class<?> clazz)
-    {
+    public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
         Set<Class<?>> interfaces = new HashSet<Class<?>>();
-        for (Class<?> intf : Arrays.asList(clazz.getInterfaces()))
-        {
-            if (intf.getInterfaces().length > 0)
-            {
+        for (Class<?> intf : Arrays.asList(clazz.getInterfaces())) {
+            if (intf.getInterfaces().length > 0) {
                 interfaces.addAll(getAllInterfaces(intf));
             }
             interfaces.add(intf);
         }
-        if (clazz.getSuperclass() != null)
-        {
+        if (clazz.getSuperclass() != null) {
             interfaces.addAll(getAllInterfaces(clazz.getSuperclass()));
         }
 
-        if (clazz.isInterface())
-        {
+        if (clazz.isInterface()) {
             interfaces.add(clazz);
         }
 
         return interfaces;
     }
 
-    private static class CascadingClassLoader extends ClassLoader
-    {
+    private static class CascadingClassLoader extends ClassLoader {
         private ClassLoader contextLoader;
 
-        CascadingClassLoader(ClassLoader contextLoader)
-        {
+        CascadingClassLoader(ClassLoader contextLoader) {
             this.contextLoader = contextLoader;
         }
 
         @Override
-        protected Class<?> findClass(String name) throws ClassNotFoundException
-        {
-            try
-            {
+        protected Class<?> findClass(String name) throws ClassNotFoundException {
+            try {
                 return contextLoader.loadClass(name);
-            }
-            catch (ClassNotFoundException cnfe)
-            {
+            } catch (ClassNotFoundException cnfe) {
                 return CascadingClassLoader.class.getClassLoader().loadClass(name);
             }
         }

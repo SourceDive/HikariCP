@@ -16,20 +16,18 @@
 
 package com.zaxxer.hikari.proxy;
 
+import com.zaxxer.hikari.javassist.HikariInject;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import com.zaxxer.hikari.javassist.HikariInject;
 
 /**
  *
  * @author Brett Wooldridge
  */
-public class PreparedStatementProxy extends StatementProxy
-{
-    protected PreparedStatementProxy(ConnectionProxy connection, PreparedStatement statement)
-    {
+public class PreparedStatementProxy extends StatementProxy {
+    protected PreparedStatementProxy(ConnectionProxy connection, PreparedStatement statement) {
         super(connection, statement);
     }
 
@@ -38,23 +36,18 @@ public class PreparedStatementProxy extends StatementProxy
     // **********************************************************************
 
     @HikariInject
-    public ResultSet executeQuery() throws SQLException
-    {
-    	try
-    	{
-	        IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __executeQuery();
-    		if (resultSet == null)
-    		{
-    			return null;
-    		}
+    public ResultSet executeQuery() throws SQLException {
+        try {
+            IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __executeQuery();
+            if (resultSet == null) {
+                return null;
+            }
 
-    		resultSet.setProxyStatement(this);
-	        return (ResultSet) resultSet;
-    	}
-    	catch (SQLException e)
-    	{
-    		throw checkException(e);
-    	}
+            resultSet.setProxyStatement(this);
+            return (ResultSet) resultSet;
+        } catch (SQLException e) {
+            throw checkException(e);
+        }
     }
 
     // ***********************************************************************
@@ -64,8 +57,7 @@ public class PreparedStatementProxy extends StatementProxy
     // delegating proxies are used.
     // ***********************************************************************
 
-    public ResultSet __executeQuery() throws SQLException
-    {
+    public ResultSet __executeQuery() throws SQLException {
         ResultSet resultSet = ((PreparedStatement) delegate).executeQuery();
         return PROXY_FACTORY.getProxyResultSet(this, resultSet);
     }

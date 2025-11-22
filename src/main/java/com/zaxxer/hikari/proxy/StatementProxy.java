@@ -16,43 +16,39 @@
 
 package com.zaxxer.hikari.proxy;
 
+import com.zaxxer.hikari.javassist.HikariInject;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.zaxxer.hikari.javassist.HikariInject;
-
 /**
  * @author Brett Wooldridge
  */
-public class StatementProxy implements IHikariStatementProxy
-{
+public class StatementProxy implements IHikariStatementProxy {
     protected static ProxyFactory PROXY_FACTORY;
 
-    @HikariInject protected IHikariConnectionProxy _connection;
-    
+    @HikariInject
+    protected IHikariConnectionProxy _connection;
+
     protected Statement delegate;
 
-    static
-    {
+    static {
         __static();
     }
 
-    protected StatementProxy(IHikariConnectionProxy connection, Statement statement)
-    {
+    protected StatementProxy(IHikariConnectionProxy connection, Statement statement) {
         this._connection = connection;
         this.delegate = statement;
     }
 
     @HikariInject
-    public void setConnectionProxy(IHikariConnectionProxy connection)
-    {
+    public void setConnectionProxy(IHikariConnectionProxy connection) {
         this._connection = connection;
     }
 
     @HikariInject
-    public SQLException checkException(SQLException e)
-    {
+    public SQLException checkException(SQLException e) {
         return _connection.checkException(e);
     }
 
@@ -61,57 +57,43 @@ public class StatementProxy implements IHikariStatementProxy
     // **********************************************************************
 
     @HikariInject
-    public void close() throws SQLException
-    {
+    public void close() throws SQLException {
         _connection.unregisterStatement(this);
-        try
-        {
-        	__close();
-        }
-        catch (SQLException e)
-        {
-        	throw checkException(e);
+        try {
+            __close();
+        } catch (SQLException e) {
+            throw checkException(e);
         }
     }
 
     @HikariInject
-    public ResultSet executeQuery(String sql) throws SQLException
-    {
-    	try
-    	{
-    		IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __executeQuery(sql);
-    		if (resultSet == null)
-    		{
-    			return null;
-    		}
+    public ResultSet executeQuery(String sql) throws SQLException {
+        try {
+            IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __executeQuery(sql);
+            if (resultSet == null) {
+                return null;
+            }
 
-	        resultSet.setProxyStatement(this);	
-	        return (ResultSet) resultSet;
-    	}
-    	catch (SQLException e)
-    	{
-    		throw checkException(e);
-    	}
+            resultSet.setProxyStatement(this);
+            return (ResultSet) resultSet;
+        } catch (SQLException e) {
+            throw checkException(e);
+        }
     }
 
     @HikariInject
-    public ResultSet getGeneratedKeys() throws SQLException
-    {
-    	try
-    	{
-	        IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __getGeneratedKeys();
-    		if (resultSet == null)
-    		{
-    			return null;
-    		}
+    public ResultSet getGeneratedKeys() throws SQLException {
+        try {
+            IHikariResultSetProxy resultSet = (IHikariResultSetProxy) __getGeneratedKeys();
+            if (resultSet == null) {
+                return null;
+            }
 
-	        resultSet.setProxyStatement(this);	
-	        return (ResultSet) resultSet;
-    	}
-    	catch (SQLException e)
-    	{
-    		throw checkException(e);
-    	}
+            resultSet.setProxyStatement(this);
+            return (ResultSet) resultSet;
+        } catch (SQLException e) {
+            throw checkException(e);
+        }
     }
 
     // ***********************************************************************
@@ -121,32 +103,26 @@ public class StatementProxy implements IHikariStatementProxy
     // delegating proxies are used.
     // ***********************************************************************
 
-    private static void __static()
-    {
-        if (PROXY_FACTORY == null)
-        {
+    private static void __static() {
+        if (PROXY_FACTORY == null) {
             PROXY_FACTORY = JavassistProxyFactoryFactory.getProxyFactory();
         }
     }
-    
-    public void __close() throws SQLException
-    {
-        if (delegate.isClosed())
-        {
+
+    public void __close() throws SQLException {
+        if (delegate.isClosed()) {
             return;
         }
 
-        delegate.close();        
+        delegate.close();
     }
 
-    public ResultSet __executeQuery(String sql) throws SQLException
-    {
+    public ResultSet __executeQuery(String sql) throws SQLException {
         ResultSet resultSet = delegate.executeQuery(sql);
         return PROXY_FACTORY.getProxyResultSet(this, resultSet);
     }
 
-    public ResultSet __getGeneratedKeys() throws SQLException
-    {
+    public ResultSet __getGeneratedKeys() throws SQLException {
         ResultSet generatedKeys = delegate.getGeneratedKeys();
         return PROXY_FACTORY.getProxyResultSet(this, generatedKeys);
     }

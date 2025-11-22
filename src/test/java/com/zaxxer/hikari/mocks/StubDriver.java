@@ -16,12 +16,7 @@
 
 package com.zaxxer.hikari.mocks;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
+import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -29,62 +24,64 @@ import java.util.logging.Logger;
  *
  * @author Brett Wooldridge
  */
-public class StubDriver implements Driver
-{
+public class StubDriver implements Driver {
     private static final Driver driver;
 
-    static
-    {
+    static {
         driver = new StubDriver();
-        try
-        {
+        try {
             DriverManager.registerDriver(driver);
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    /** {@inheritDoc} */
-    public Connection connect(String url, Properties info) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public Connection connect(String url, Properties info) throws SQLException {
         return new StubConnection();
     }
 
-    /** {@inheritDoc} */
-    public boolean acceptsURL(String url) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean acceptsURL(String url) throws SQLException {
         return true;
     }
 
-    /** {@inheritDoc} */
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         return null;
     }
 
-    /** {@inheritDoc} */
-    public int getMajorVersion()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMajorVersion() {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public int getMinorVersion()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMinorVersion() {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public boolean jdbcCompliant()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean jdbcCompliant() {
         return true;
     }
 
-    /** {@inheritDoc} */
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
 }

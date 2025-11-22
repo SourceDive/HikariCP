@@ -22,10 +22,8 @@ import java.sql.CallableStatement;
  *
  * @author Brett Wooldridge
  */
-public class CallableStatementProxy extends PreparedStatementProxy
-{
-    protected CallableStatementProxy(ConnectionProxy connection, CallableStatement statement)
-    {
+public class CallableStatementProxy extends PreparedStatementProxy {
+    protected CallableStatementProxy(ConnectionProxy connection, CallableStatement statement) {
         super(connection, statement);
     }
 

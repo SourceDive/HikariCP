@@ -16,18 +16,17 @@
 
 package com.zaxxer.hikari.proxy;
 
+import com.zaxxer.hikari.HikariPool;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Timer;
-
-import com.zaxxer.hikari.HikariPool;
 
 /**
  *
  * @author Brett Wooldridge
  */
-public interface IHikariConnectionProxy
-{
+public interface IHikariConnectionProxy {
     void unclose();
 
     void __close() throws SQLException;

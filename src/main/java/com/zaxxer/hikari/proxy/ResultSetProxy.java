@@ -16,46 +16,42 @@
 
 package com.zaxxer.hikari.proxy;
 
+import com.zaxxer.hikari.javassist.HikariInject;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.zaxxer.hikari.javassist.HikariInject;
-
 /**
  * @author Brett Wooldridge
  */
-public class ResultSetProxy implements IHikariResultSetProxy
-{
-    @HikariInject private IHikariStatementProxy _statement;
+public class ResultSetProxy implements IHikariResultSetProxy {
+    @HikariInject
+    private IHikariStatementProxy _statement;
 
     protected final ResultSet delegate;
 
-    protected ResultSetProxy(IHikariStatementProxy statement, ResultSet resultSet)
-    {
+    protected ResultSetProxy(IHikariStatementProxy statement, ResultSet resultSet) {
         this._statement = statement;
         this.delegate = resultSet;
     }
 
     @HikariInject
-    public SQLException checkException(SQLException e)
-    {
+    public SQLException checkException(SQLException e) {
         return _statement.checkException(e);
     }
-    
+
     @HikariInject
-    public void setProxyStatement(IHikariStatementProxy statement)
-    {
+    public void setProxyStatement(IHikariStatementProxy statement) {
         this._statement = statement;
     }
-    
+
     // **********************************************************************
     //                 Overridden java.sql.ResultSet Methods
     //                      other methods are injected
     // **********************************************************************
 
-    public Statement getStatement() throws SQLException
-    {
+    public Statement getStatement() throws SQLException {
         return (Statement) _statement;
     }
 }

@@ -16,30 +16,28 @@
 
 package com.zaxxer.hikari.proxy;
 
-import java.util.TimerTask;
-
 import org.slf4j.LoggerFactory;
+
+import java.util.TimerTask;
 
 /**
  * @author Brett Wooldridge
  */
-public class LeakTask extends TimerTask
-{
+public class LeakTask extends TimerTask {
     private final long leakTime;
     private StackTraceElement[] stackTrace;
 
-    public LeakTask(StackTraceElement[] stackTrace, long leakDetectionThreshold)
-    {
+    public LeakTask(StackTraceElement[] stackTrace, long leakDetectionThreshold) {
         this.stackTrace = stackTrace;
         this.leakTime = System.currentTimeMillis() + leakDetectionThreshold;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void run()
-    {
-        if (System.currentTimeMillis() > leakTime)
-        {
+    public void run() {
+        if (System.currentTimeMillis() > leakTime) {
             Exception e = new Exception();
             e.setStackTrace(stackTrace);
             LoggerFactory.getLogger(LeakTask.class).warn("Connection leak detection triggered, stack trace follows", e);
@@ -48,11 +46,9 @@ public class LeakTask extends TimerTask
     }
 
     @Override
-    public boolean cancel()
-    {
+    public boolean cancel() {
         boolean cancelled = super.cancel();
-        if (cancelled)
-        {
+        if (cancelled) {
             stackTrace = null;
         }
         return cancelled;

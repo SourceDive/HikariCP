@@ -16,265 +16,304 @@
 
 package com.zaxxer.hikari.mocks;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
+import java.sql.*;
 
 /**
  *
  * @author Brett Wooldridge
  */
-public class StubStatement implements Statement
-{
-    /** {@inheritDoc} */
-    public <T> T unwrap(Class<T> iface) throws SQLException
-    {
+public class StubStatement implements Statement {
+    /**
+     * {@inheritDoc}
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
         return null;
     }
 
-    /** {@inheritDoc} */
-    public boolean isWrapperFor(Class<?> iface) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public ResultSet executeQuery(String sql) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public ResultSet executeQuery(String sql) throws SQLException {
         return new StubResultSet();
     }
 
-    /** {@inheritDoc} */
-    public int executeUpdate(String sql) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int executeUpdate(String sql) throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void close() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void close() throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int getMaxFieldSize() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMaxFieldSize() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void setMaxFieldSize(int max) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setMaxFieldSize(int max) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int getMaxRows() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMaxRows() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void setMaxRows(int max) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setMaxRows(int max) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public void setEscapeProcessing(boolean enable) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setEscapeProcessing(boolean enable) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int getQueryTimeout() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getQueryTimeout() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void setQueryTimeout(int seconds) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setQueryTimeout(int seconds) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public void cancel() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void cancel() throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public SQLWarning getWarnings() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public SQLWarning getWarnings() throws SQLException {
         return null;
     }
 
-    /** {@inheritDoc} */
-    public void clearWarnings() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void clearWarnings() throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public void setCursorName(String name) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setCursorName(String name) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public boolean execute(String sql) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean execute(String sql) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public ResultSet getResultSet() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public ResultSet getResultSet() throws SQLException {
         return new StubResultSet();
     }
 
-    /** {@inheritDoc} */
-    public int getUpdateCount() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getUpdateCount() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public boolean getMoreResults() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean getMoreResults() throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public void setFetchDirection(int direction) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setFetchDirection(int direction) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int getFetchDirection() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getFetchDirection() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void setFetchSize(int rows) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setFetchSize(int rows) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int getFetchSize() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getFetchSize() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public int getResultSetConcurrency() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getResultSetConcurrency() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public int getResultSetType() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getResultSetType() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public void addBatch(String sql) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void addBatch(String sql) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public void clearBatch() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void clearBatch() throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public int[] executeBatch() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int[] executeBatch() throws SQLException {
         return null;
     }
 
-    /** {@inheritDoc} */
-    public Connection getConnection() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public Connection getConnection() throws SQLException {
         return null;
     }
 
-    /** {@inheritDoc} */
-    public boolean getMoreResults(int current) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean getMoreResults(int current) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public ResultSet getGeneratedKeys() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public ResultSet getGeneratedKeys() throws SQLException {
         return new StubResultSet();
     }
 
-    /** {@inheritDoc} */
-    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public int executeUpdate(String sql, int[] columnIndexes) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int executeUpdate(String sql, int[] columnIndexes) throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public int executeUpdate(String sql, String[] columnNames) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int executeUpdate(String sql, String[] columnNames) throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public boolean execute(String sql, int[] columnIndexes) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean execute(String sql, int[] columnIndexes) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public boolean execute(String sql, String[] columnNames) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean execute(String sql, String[] columnNames) throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public int getResultSetHoldability() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getResultSetHoldability() throws SQLException {
         return 0;
     }
 
-    /** {@inheritDoc} */
-    public boolean isClosed() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isClosed() throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public void setPoolable(boolean poolable) throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setPoolable(boolean poolable) throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public boolean isPoolable() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isPoolable() throws SQLException {
         return false;
     }
 
-    /** {@inheritDoc} */
-    public void closeOnCompletion() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void closeOnCompletion() throws SQLException {
     }
 
-    /** {@inheritDoc} */
-    public boolean isCloseOnCompletion() throws SQLException
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isCloseOnCompletion() throws SQLException {
         return false;
     }
 

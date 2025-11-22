@@ -16,25 +16,24 @@
 
 package com.zaxxer.hikari;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class HikariConfig implements HikariConfigMBean
-{
+public final class HikariConfig implements HikariConfigMBean {
     private static int poolNumber;
 
     // Properties changeable at runtime through the MBean
     //
     private volatile int acquireIncrement;
-    private volatile  int acquireRetries;
-    private volatile  long acquireRetryDelay;
-    private volatile  long connectionTimeout;
+    private volatile int acquireRetries;
+    private volatile long acquireRetryDelay;
+    private volatile long connectionTimeout;
     private volatile long idleTimeout;
     private volatile long leakDetectionThreshold;
     private volatile long maxLifetime;
@@ -54,8 +53,7 @@ public final class HikariConfig implements HikariConfigMBean
     /**
      * Default constructor
      */
-    public HikariConfig()
-    {
+    public HikariConfig() {
         driverProperties = new Properties();
 
         acquireIncrement = 5;
@@ -76,217 +74,214 @@ public final class HikariConfig implements HikariConfigMBean
      *
      * @param propertyFileName the name of the property file
      */
-    public HikariConfig(String propertyFileName)
-    {
+    public HikariConfig(String propertyFileName) {
         this();
 
         File propFile = new File(propertyFileName);
-        if (!propFile.isFile())
-        {
+        if (!propFile.isFile()) {
             throw new IllegalArgumentException("Property file " + propertyFileName + " was not found.");
         }
 
-        try
-        {
+        try {
             FileInputStream fis = new FileInputStream(propFile);
             Properties props = new Properties();
             props.load(fis);
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             throw new RuntimeException("Error loading properties file", io);
         }
     }
 
-    public void addDataSourceProperty(String propertyName, String value)
-    {
+    public void addDataSourceProperty(String propertyName, String value) {
         driverProperties.put(propertyName, value);
     }
 
-    public Properties getDataSourceProperties()
-    {
+    public Properties getDataSourceProperties() {
         return driverProperties;
     }
 
-    /** {@inheritDoc} */
-    public int getAcquireIncrement()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getAcquireIncrement() {
         return acquireIncrement;
     }
 
-    /** {@inheritDoc} */
-    public void setAcquireIncrement(int acquireIncrement)
-    {
-        if (acquireIncrement < 1)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setAcquireIncrement(int acquireIncrement) {
+        if (acquireIncrement < 1) {
             throw new IllegalArgumentException("acquireRetries cannot be less than 1");
         }
         this.acquireIncrement = acquireIncrement;
     }
 
-    /** {@inheritDoc} */
-    public int getAcquireRetries()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getAcquireRetries() {
         return acquireRetries;
     }
 
-    /** {@inheritDoc} */
-    public void setAcquireRetries(int acquireRetries)
-    {
-        if (acquireRetries < 0)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setAcquireRetries(int acquireRetries) {
+        if (acquireRetries < 0) {
             throw new IllegalArgumentException("acquireRetries cannot be negative");
         }
         this.acquireRetries = acquireRetries;
     }
 
-    /** {@inheritDoc} */
-    public long getAcquireRetryDelay()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public long getAcquireRetryDelay() {
         return acquireRetryDelay;
     }
 
-    /** {@inheritDoc} */
-    public void setAcquireRetryDelay(long acquireRetryDelayMs)
-    {
-        if (acquireRetryDelayMs < 0)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setAcquireRetryDelay(long acquireRetryDelayMs) {
+        if (acquireRetryDelayMs < 0) {
             throw new IllegalArgumentException("acquireRetryDelay cannot be negative");
         }
         this.acquireRetryDelay = acquireRetryDelayMs;
     }
 
-    public String getConnectionTestQuery()
-    {
+    public String getConnectionTestQuery() {
         return connectionTestQuery;
     }
 
-    public void setConnectionTestQuery(String connectionTestQuery)
-    {
+    public void setConnectionTestQuery(String connectionTestQuery) {
         this.connectionTestQuery = connectionTestQuery;
     }
 
-    /** {@inheritDoc} */
-    public long getConnectionTimeout()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public long getConnectionTimeout() {
         return connectionTimeout;
     }
 
-    /** {@inheritDoc} */
-    public void setConnectionTimeout(long connectionTimeoutMs)
-    {
-        if (connectionTimeoutMs < 0)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setConnectionTimeout(long connectionTimeoutMs) {
+        if (connectionTimeoutMs < 0) {
             throw new IllegalArgumentException("connectionTimeout cannot be negative");
         }
-        if (connectionTimeoutMs == 0)
-        {
+        if (connectionTimeoutMs == 0) {
             this.connectionTimeout = Integer.MAX_VALUE;
         }
         this.connectionTimeout = connectionTimeoutMs;
     }
 
-    public String getDataSourceClassName()
-    {
+    public String getDataSourceClassName() {
         return dataSourceClassName;
     }
 
-    public void setDataSourceClassName(String className)
-    {
+    public void setDataSourceClassName(String className) {
         this.dataSourceClassName = className;
     }
 
-    /** {@inheritDoc} */
-    public long getIdleTimeout()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public long getIdleTimeout() {
         return idleTimeout;
     }
 
-    /** {@inheritDoc} */
-    public void setIdleTimeout(long idleTimeoutMs)
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setIdleTimeout(long idleTimeoutMs) {
         this.idleTimeout = idleTimeoutMs;
     }
 
-    public boolean isAutoCommit()
-    {
+    public boolean isAutoCommit() {
         return isAutoCommit;
     }
 
-    public void setAutoCommit(boolean isAutoCommit)
-    {
+    public void setAutoCommit(boolean isAutoCommit) {
         this.isAutoCommit = isAutoCommit;
     }
 
-    public boolean isJdbc4ConnectionTest()
-    {
+    public boolean isJdbc4ConnectionTest() {
         return isJdbc4connectionTest;
     }
 
-    public void setJdbc4ConnectionTest(boolean useIsValid)
-    {
+    public void setJdbc4ConnectionTest(boolean useIsValid) {
         this.isJdbc4connectionTest = useIsValid;
     }
 
-    /** {@inheritDoc} */
-    public long getLeakDetectionThreshold()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public long getLeakDetectionThreshold() {
         return leakDetectionThreshold;
     }
 
-    /** {@inheritDoc} */
-    public void setLeakDetectionThreshold(long leakDetectionThresholdMs)
-    {
-        this.leakDetectionThreshold = leakDetectionThresholdMs; 
+    /**
+     * {@inheritDoc}
+     */
+    public void setLeakDetectionThreshold(long leakDetectionThresholdMs) {
+        this.leakDetectionThreshold = leakDetectionThresholdMs;
     }
 
-    /** {@inheritDoc} */
-    public long getMaxLifetime()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public long getMaxLifetime() {
         return maxLifetime;
     }
 
-    /** {@inheritDoc} */
-    public void setMaxLifetime(long maxLifetimeMs)
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void setMaxLifetime(long maxLifetimeMs) {
         this.maxLifetime = maxLifetimeMs;
     }
 
-    /** {@inheritDoc} */
-    public int getMinimumPoolSize()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMinimumPoolSize() {
         return minPoolSize;
     }
 
-    /** {@inheritDoc} */
-    public void setMinimumPoolSize(int minPoolSize)
-    {
-        if (minPoolSize < 0)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setMinimumPoolSize(int minPoolSize) {
+        if (minPoolSize < 0) {
             throw new IllegalArgumentException("minPoolSize cannot be negative");
         }
         this.minPoolSize = minPoolSize;
     }
 
-    /** {@inheritDoc} */
-    public int getMaximumPoolSize()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getMaximumPoolSize() {
         return maxPoolSize;
     }
 
-    /** {@inheritDoc} */
-    public void setMaximumPoolSize(int maxPoolSize)
-    {
-        if (maxPoolSize < 0)
-        {
+    /**
+     * {@inheritDoc}
+     */
+    public void setMaximumPoolSize(int maxPoolSize) {
+        if (maxPoolSize < 0) {
             throw new IllegalArgumentException("maxPoolSize cannot be negative");
         }
         this.maxPoolSize = maxPoolSize;
     }
 
-    /** {@inheritDoc} */
-    public String getPoolName()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public String getPoolName() {
         return poolName;
     }
 
@@ -296,53 +291,44 @@ public final class HikariConfig implements HikariConfigMBean
      *
      * @param poolName the name of the connection pool to use
      */
-    public void setPoolName(String poolName)
-    {
+    public void setPoolName(String poolName) {
         this.poolName = poolName;
     }
 
-    public void validate()
-    {
+    public void validate() {
         Logger logger = LoggerFactory.getLogger(getClass());
 
-        if (!isJdbc4connectionTest && connectionTestQuery == null)
-        {
+        if (!isJdbc4connectionTest && connectionTestQuery == null) {
             logger.error("Either jdbc4ConnectionTest must be enabled or a connectionTestQuery must be specified.");
             throw new IllegalStateException("Either jdbc4ConnectionTest must be enabled or a connectionTestQuery must be specified.");
         }
 
-        if (minPoolSize < 0)
-        {
+        if (minPoolSize < 0) {
             logger.error("minPoolSize cannot be negative.");
             throw new IllegalStateException("minPoolSize cannot be negative.");
         }
 
-        if (maxLifetime < 0)
-        {
+        if (maxLifetime < 0) {
             logger.error("maxLifetime cannot be negative.");
             throw new IllegalStateException("maxLifetime cannot be negative.");
         }
 
-        if (idleTimeout < 0)
-        {
+        if (idleTimeout < 0) {
             logger.error("idleTimeout cannot be negative.");
             throw new IllegalStateException("idleTimeout cannot be negative.");
         }
 
-        if (acquireRetryDelay < 0)
-        {
+        if (acquireRetryDelay < 0) {
             logger.error("acquireRetryDelay cannot be negative.");
             throw new IllegalStateException("acquireRetryDelay cannot be negative.");
         }
 
-        if (maxPoolSize < minPoolSize)
-        {
+        if (maxPoolSize < minPoolSize) {
             logger.warn("maxPoolSize is less than minPoolSize, forcing them equal.");
             maxPoolSize = minPoolSize;
         }
 
-        if (connectionTimeout == Integer.MAX_VALUE)
-        {
+        if (connectionTimeout == Integer.MAX_VALUE) {
             logger.warn("No connection wait timeout is set, this might cause an infinite wait.");
         }
     }

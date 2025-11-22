@@ -16,27 +16,25 @@
 
 package com.zaxxer.hikari;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 /**
  * System property testProxy can be one of:
- *    "com.zaxxer.hikari.JavaProxyFactory"
- *    "com.zaxxer.hikari.CglibProxyFactory"
- *    "com.zaxxer.hikari.JavassistProxyFactory"
+ * "com.zaxxer.hikari.JavaProxyFactory"
+ * "com.zaxxer.hikari.CglibProxyFactory"
+ * "com.zaxxer.hikari.JavassistProxyFactory"
  *
  * @author Brett Wooldridge
  */
-public class CreationTest
-{
+public class CreationTest {
     @Test
-    public void testCreate() throws SQLException
-    {
+    public void testCreate() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setMinimumPoolSize(1);
         config.setMaximumPoolSize(1);
@@ -76,8 +74,7 @@ public class CreationTest
     }
 
     @Test
-    public void testMaxLifetime() throws Exception
-    {
+    public void testMaxLifetime() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumPoolSize(1);
         config.setMaximumPoolSize(1);
@@ -103,7 +100,7 @@ public class CreationTest
         Connection connection2 = ds.getConnection();
         Assert.assertSame("Expected the same connection", connection, connection2);
         connection2.close();
-        
+
         Thread.sleep(501);
 
         connection2 = ds.getConnection();
@@ -116,8 +113,7 @@ public class CreationTest
     }
 
     @Test
-    public void testDoubleClose() throws Exception
-    {
+    public void testDoubleClose() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumPoolSize(1);
         config.setMaximumPoolSize(1);

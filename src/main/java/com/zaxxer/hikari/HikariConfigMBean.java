@@ -21,8 +21,7 @@ package com.zaxxer.hikari;
  *
  * @author Brett Wooldridge
  */
-public interface HikariConfigMBean
-{
+public interface HikariConfigMBean {
     /**
      * This property controls the maximum number of connections that are acquired at one time,
      * with the exception of pool initialization.
@@ -43,7 +42,7 @@ public interface HikariConfigMBean
      * This is a per-connection attempt retry count used during new connection creation (acquisition).
      * If a connection creation attempt fails there will be a wait of {@link #getAcquireRetryDelay} milliseconds
      * followed by another attempt, up to the number of retries configured by this property.
-     * 
+     *
      * @return the acquire retry count
      */
     int getAcquireRetries();
@@ -68,13 +67,13 @@ public interface HikariConfigMBean
     /**
      * This property controls the number of milliseconds to delay between attempts to acquire a connection
      * to the database. If acquireRetries is 0, this property has no effect.
-     * 
+     *
      * @param acquireRetryDelayMs the acquire retry delay in milliseconds
      */
     void setAcquireRetryDelay(long acquireRetryDelayMs);
 
     /**
-     * This is for "legacy" databases that do not support the JDBC4 {@code Connection.isValid()} API. This is the 
+     * This is for "legacy" databases that do not support the JDBC4 {@code Connection.isValid()} API. This is the
      * query that will be executed just before a connection is given to you from the pool to validate that
      * the connection to the database is still alive. It is database dependent and should be a query that
      * takes very little processing by the database (eg. "VALUES 1"). See the {code getJdbc4ConnectionTest()} property
@@ -85,18 +84,18 @@ public interface HikariConfigMBean
     long getConnectionTimeout();
 
     /**
-     * This is for "legacy" databases that do not support the JDBC4 {code Connection.isValid()} API. This is the 
+     * This is for "legacy" databases that do not support the JDBC4 {code Connection.isValid()} API. This is the
      * query that will be executed just before a connection is given to you from the pool to validate that
      * the connection to the database is still alive. It is database dependent and should be a query that
      * takes very little processing by the database (eg. "VALUES 1"). See the {@code setJdbc4ConnectionTest()} property
      * for a more efficent alive test. One of either this property or jdbc4ConnectionTest must be specified.
-
+     *
      * @param connectionTimeoutMs the connection timeout in milliseconds
      */
     void setConnectionTimeout(long connectionTimeoutMs);
 
     /**
-     * This property controls the maximum amount of time (in milliseconds) that a connection is allowed to sit 
+     * This property controls the maximum amount of time (in milliseconds) that a connection is allowed to sit
      * idle in the pool. Whether a connection is retired as idle or not is subject to a maximum variation of +30
      * seconds, and average variation of +15 seconds. A connection will never be retired as idle before this timeout.
      * A value of 0 means that idle connections are never removed from the pool.
@@ -106,7 +105,7 @@ public interface HikariConfigMBean
     long getIdleTimeout();
 
     /**
-     * This property controls the maximum amount of time (in milliseconds) that a connection is allowed to sit 
+     * This property controls the maximum amount of time (in milliseconds) that a connection is allowed to sit
      * idle in the pool. Whether a connection is retired as idle or not is subject to a maximum variation of +30
      * seconds, and average variation of +15 seconds. A connection will never be retired as idle before this timeout.
      * A value of 0 means that idle connections are never removed from the pool.

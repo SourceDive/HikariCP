@@ -16,51 +16,41 @@
 
 package com.zaxxer.hikari.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author Brett Wooldridge
  */
-public final class PropertyBeanSetter
-{
+public final class PropertyBeanSetter {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyBeanSetter.class);
 
-    public static void setTargetFromProperties(Object target, Properties properties)
-    {
-        if (target == null || properties == null)
-        {
+    public static void setTargetFromProperties(Object target, Properties properties) {
+        if (target == null || properties == null) {
             return;
         }
 
-        for (Object propKey : properties.keySet())
-        {
+        for (Object propKey : properties.keySet()) {
             String propName = propKey.toString();
             String capitalized = "set" + propName.substring(0, 1).toUpperCase() + propName.substring(1);
-            try
-            {
+            try {
                 PropertyDescriptor propertyDescriptor = new PropertyDescriptor(propName, target.getClass(), null, capitalized);
                 Method writeMethod = propertyDescriptor.getWriteMethod();
-                if (writeMethod == null)
-                {
+                if (writeMethod == null) {
                     LOGGER.error("Property setter {}() is does not exist on target class {}", capitalized, target.getClass());
                     continue;
                 }
 
                 writeMethod.invoke(target, properties.get(propKey));
-            }
-            catch (IntrospectionException e)
-            {
+            } catch (IntrospectionException e) {
                 LOGGER.error("Property {} is does not exist on target class {}", propName, target.getClass());
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 LOGGER.error("Exception setting property {} on target class {}", propName, target.getClass(), e);
             }
         }

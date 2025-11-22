@@ -16,6 +16,12 @@
 
 package com.zaxxer.hikari.performance;
 
+import com.jolbox.bonecp.BoneCPConfig;
+import com.jolbox.bonecp.BoneCPDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -25,49 +31,34 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
-import javax.sql.DataSource;
-
-import com.jolbox.bonecp.BoneCPConfig;
-import com.jolbox.bonecp.BoneCPDataSource;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 /**
  *
  * @author Brett Wooldridge
  */
-public class Benchmark2
-{
+public class Benchmark2 {
     private static final int THREADS = Integer.getInteger("threads", 100);
     private static final int POOL_MAX = Integer.getInteger("poolMax", 100);
 
     private DataSource ds;
 
-    public static void main(String[] args)
-    {
-        if (args.length == 0)
-        {
+    public static void main(String[] args) {
+        if (args.length == 0) {
             System.err.println("Start with one of: hikari, bone");
             System.exit(0);
         }
 
         Benchmark2 benchmarks = new Benchmark2();
-        if (args[0].equals("hikari"))
-        {
+        if (args[0].equals("hikari")) {
             benchmarks.ds = benchmarks.setupHikari();
             System.out.printf("Benchmarking HikariCP - %d threads, %d pool\n", THREADS, POOL_MAX);
-        }
-        else if (args[0].equals("bone"))
-        {
+        } else if (args[0].equals("bone")) {
             benchmarks.ds = benchmarks.setupBone();
             System.out.printf("Benchmarking BoneCP - %d threads, %d pool\n", THREADS, POOL_MAX);
-        }
-        else
-        {
+        } else {
             System.err.println("Start with one of: hikari, bone");
             System.exit(0);
         }
-        
+
         System.out.println("\nMixedBench");
         System.out.println(" Warming up JIT");
         benchmarks.startMixedBench();
@@ -86,8 +77,7 @@ public class Benchmark2
 
     }
 
-    private DataSource setupHikari()
-    {
+    private DataSource setupHikari() {
         HikariConfig config = new HikariConfig();
         config.setAcquireIncrement(5);
         config.setMinimumPoolSize(POOL_MAX / 2);
@@ -105,15 +95,11 @@ public class Benchmark2
         HikariDataSource ds = new HikariDataSource(config);
         return ds;
     }
-    
-    private DataSource setupBone()
-    {
-        try
-        {
+
+    private DataSource setupBone() {
+        try {
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
-        }
-        catch (ClassNotFoundException e)
-        {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -136,16 +122,14 @@ public class Benchmark2
         return ds;
     }
 
-    private void startMixedBench()
-    {
+    private void startMixedBench() {
         CyclicBarrier barrier = new CyclicBarrier(THREADS);
         CountDownLatch latch = new CountDownLatch(THREADS);
 
         setupSchema(true);
 
         Measurable[] runners = new Measurable[THREADS];
-        for (int i = 0; i < THREADS; i++)
-        {
+        for (int i = 0; i < THREADS; i++) {
             runners[i] = new SillyRunner2(barrier, latch);
         }
 
@@ -154,64 +138,45 @@ public class Benchmark2
         setupSchema(false);
     }
 
-    private void setupSchema(boolean create)
-    {
+    private void setupSchema(boolean create) {
         Connection connection = null;
-        try
-        {
+        try {
             connection = ds.getConnection();
             Statement statement = connection.createStatement();
-            if (create)
-            {
+            if (create) {
                 statement.execute("CREATE TABLE test ( column INTEGER )");
                 statement.execute("CREATE INDEX test_ndx ON test(column)");
-            }
-            else
-            {
+            } else {
                 statement.execute("DROP TABLE test");
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to create test schema", e);
-        }
-        finally
-        {
-            if (connection != null)
-            {
-                try
-                {
+        } finally {
+            if (connection != null) {
+                try {
                     connection.close();
-                }
-                catch (SQLException e)
-                {
+                } catch (SQLException e) {
                 }
             }
         }
     }
 
-    private void runAndMeasure(Measurable[] runners, CountDownLatch latch, String timeUnit)
-    {
-        for (int i = 0; i < THREADS; i++)
-        {
+    private void runAndMeasure(Measurable[] runners, CountDownLatch latch, String timeUnit) {
+        for (int i = 0; i < THREADS; i++) {
             Thread t = new Thread(runners[i]);
             t.start();
         }
 
-        try
-        {
+        try {
             latch.await();
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         int i = 0;
         long[] track = new long[THREADS];
         long max = 0, avg = 0, med = 0;
-        for (Measurable runner : runners)
-        {
+        for (Measurable runner : runners) {
             long elapsed = runner.getElapsed();
             track[i++] = elapsed;
             max = Math.max(max, elapsed);
@@ -223,62 +188,49 @@ public class Benchmark2
         System.out.printf("  max=%d%4$s, avg=%d%4$s, med=%d%4$s\n", max, avg, med, timeUnit);
     }
 
-    private class SillyRunner2 implements Measurable
-    {
+    private class SillyRunner2 implements Measurable {
         private CyclicBarrier barrier;
         private CountDownLatch latch;
         private long start;
         private long finish;
         private int counter;
 
-        public SillyRunner2(CyclicBarrier barrier, CountDownLatch latch)
-        {
+        public SillyRunner2(CyclicBarrier barrier, CountDownLatch latch) {
             this.barrier = barrier;
             this.latch = latch;
         }
 
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 barrier.await();
 
                 start = System.nanoTime();
-                for (int i = 0; i < 1000; i++)
-                {
+                for (int i = 0; i < 1000; i++) {
                     Connection connection = ds.getConnection();
-                    for (int j = 0; j < 100; j++)
-                    {
+                    for (int j = 0; j < 100; j++) {
                         PreparedStatement statement = connection.prepareStatement("INSERT INTO test (column) VALUES (?)");
                         statement.close();
                     }
                     connection.close();
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
-            }
-            finally
-            {
+            } finally {
                 finish = System.nanoTime();
                 latch.countDown();
             }
         }
 
-        public long getElapsed()
-        {
+        public long getElapsed() {
             return TimeUnit.NANOSECONDS.toMillis(finish - start);
         }
 
-        public int getCounter()
-        {
+        public int getCounter() {
             return counter;
         }
     }
 
-    private interface Measurable extends Runnable
-    {
+    private interface Measurable extends Runnable {
         long getElapsed();
 
         int getCounter();

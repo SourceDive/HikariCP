@@ -16,14 +16,9 @@
 
 package com.zaxxer.hikari.proxy;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
-public abstract class ProxyFactory
-{
+public abstract class ProxyFactory {
     /* Classes should use ProxyFactory.INSTANCE to access the factory */
     // final ProxyFactory INSTANCE = Initializer.initialize();
 

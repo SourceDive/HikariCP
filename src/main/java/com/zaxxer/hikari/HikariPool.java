@@ -16,6 +16,17 @@
 
 package com.zaxxer.hikari;
 
+import com.zaxxer.hikari.javassist.HikariInstrumentationAgent;
+import com.zaxxer.hikari.proxy.IHikariConnectionProxy;
+import com.zaxxer.hikari.proxy.JavassistProxyFactoryFactory;
+import com.zaxxer.hikari.util.ClassLoaderUtils;
+import com.zaxxer.hikari.util.PropertyBeanSetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.sql.DataSource;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,27 +37,13 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.zaxxer.hikari.javassist.HikariInstrumentationAgent;
-import com.zaxxer.hikari.proxy.IHikariConnectionProxy;
-import com.zaxxer.hikari.proxy.JavassistProxyFactoryFactory;
-import com.zaxxer.hikari.util.ClassLoaderUtils;
-import com.zaxxer.hikari.util.PropertyBeanSetter;
-
 /**
  * This is the primary connection pool class that provides the basic
  * pooling behavior for HikariCP.
  *
  * @author Brett Wooldridge
  */
-public final class HikariPool implements HikariPoolMBean
-{
+public final class HikariPool implements HikariPoolMBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(HikariPool.class);
 
     private final HikariConfig configuration;
@@ -66,8 +63,7 @@ public final class HikariPool implements HikariPoolMBean
      *
      * @param configuration a HikariConfig instance
      */
-    HikariPool(HikariConfig configuration)
-    {
+    HikariPool(HikariConfig configuration) {
         configuration.validate();
 
         this.configuration = configuration;
@@ -78,21 +74,17 @@ public final class HikariPool implements HikariPoolMBean
         this.jdbc4ConnectionTest = configuration.isJdbc4ConnectionTest();
         this.leakDetectionThreshold = configuration.getLeakDetectionThreshold();
 
-        try
-        {
+        try {
             Class<?> clazz = ClassLoaderUtils.loadClass(configuration.getDataSourceClassName());
             this.dataSource = (DataSource) clazz.newInstance();
             PropertyBeanSetter.setTargetFromProperties(dataSource, configuration.getDataSourceProperties());
 
             HikariInstrumentationAgent instrumentationAgent = new HikariInstrumentationAgent(dataSource);
-            delegationProxies = !instrumentationAgent.loadTransformerAgent(); 
-            if (delegationProxies)
-            {
+            delegationProxies = !instrumentationAgent.loadTransformerAgent();
+            if (delegationProxies) {
                 LOGGER.info("Falling back to Javassist delegate-based proxies.");
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Could not create datasource class: " + configuration.getDataSourceClassName(), e);
         }
 
@@ -101,12 +93,11 @@ public final class HikariPool implements HikariPoolMBean
         houseKeepingTimer = new Timer("Hikari Housekeeping Timer", true);
 
         long idleTimeout = configuration.getIdleTimeout();
-        if (idleTimeout > 0 || configuration.getMaxLifetime() > 0)
-        {
+        if (idleTimeout > 0 || configuration.getMaxLifetime() > 0) {
             houseKeepingTimer.scheduleAtFixedRate(new HouseKeeper(), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
         }
 
-        fillPool();            
+        fillPool();
     }
 
     /**
@@ -115,22 +106,17 @@ public final class HikariPool implements HikariPoolMBean
      * @return a java.sql.Connection instance
      * @throws SQLException thrown if a timeout occurs trying to obtain a connection
      */
-    Connection getConnection() throws SQLException
-    {
-        try
-        {
+    Connection getConnection() throws SQLException {
+        try {
             long timeout = configuration.getConnectionTimeout();
             final long start = System.currentTimeMillis();
-            do
-            {
-                if (idleConnectionCount.get() == 0)
-                {
+            do {
+                if (idleConnectionCount.get() == 0) {
                     addConnections();
                 }
-    
+
                 IHikariConnectionProxy connectionProxy = idleConnections.poll(timeout, TimeUnit.MILLISECONDS);
-                if (connectionProxy == null)
-                {
+                if (connectionProxy == null) {
                     LOGGER.error("Timeout of {}ms encountered waiting for connection", configuration.getConnectionTimeout());
                     throw new SQLException("Timeout of encountered waiting for connection");
                 }
@@ -138,8 +124,7 @@ public final class HikariPool implements HikariPoolMBean
                 idleConnectionCount.decrementAndGet();
 
                 final long maxLifetime = configuration.getMaxLifetime();
-                if (maxLifetime > 0 && start - connectionProxy.getCreationTime() > maxLifetime)
-                {
+                if (maxLifetime > 0 && start - connectionProxy.getCreationTime() > maxLifetime) {
                     // Throw away the connection that has passed its lifetime, try again
                     closeConnection(connectionProxy);
                     timeout -= (System.currentTimeMillis() - start);
@@ -148,17 +133,15 @@ public final class HikariPool implements HikariPoolMBean
 
                 connectionProxy.unclose();
 
-                Connection connection = (Connection) connectionProxy; 
-                if (!isConnectionAlive(connection, timeout))
-                {
+                Connection connection = (Connection) connectionProxy;
+                if (!isConnectionAlive(connection, timeout)) {
                     // Throw away the dead connection, try again
                     closeConnection(connectionProxy);
                     timeout -= (System.currentTimeMillis() - start);
                     continue;
                 }
-    
-                if (leakDetectionThreshold > 0)
-                {
+
+                if (leakDetectionThreshold > 0) {
                     connectionProxy.captureStack(leakDetectionThreshold, houseKeepingTimer);
                 }
 
@@ -166,10 +149,8 @@ public final class HikariPool implements HikariPoolMBean
 
             } while (timeout > 0);
 
-            throw new SQLException("Timeout of encountered waiting for connection");            
-        }
-        catch (InterruptedException e)
-        {
+            throw new SQLException("Timeout of encountered waiting for connection");
+        } catch (InterruptedException e) {
             return null;
         }
     }
@@ -180,16 +161,12 @@ public final class HikariPool implements HikariPoolMBean
      *
      * @param connectionProxy the connection to release back to the pool
      */
-    public void releaseConnection(IHikariConnectionProxy connectionProxy)
-    {
-        if (!connectionProxy.isBrokenConnection())
-        {
+    public void releaseConnection(IHikariConnectionProxy connectionProxy) {
+        if (!connectionProxy.isBrokenConnection()) {
             connectionProxy.markLastAccess();
             idleConnectionCount.incrementAndGet();
             idleConnections.put(connectionProxy);
-        }
-        else
-        {
+        } else {
             closeConnection(connectionProxy);
         }
     }
@@ -197,45 +174,48 @@ public final class HikariPool implements HikariPoolMBean
     // ***********************************************************************
     //                        HikariPoolMBean methods
     // ***********************************************************************
-    
-    /** {@inheritDoc} */
-    public int getActiveConnections()
-    {
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getActiveConnections() {
         return Math.min(configuration.getMaximumPoolSize(), totalConnections.get() - idleConnectionCount.get());
     }
-    
-    /** {@inheritDoc} */
-    public int getIdleConnections()
-    {
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getIdleConnections() {
         return idleConnectionCount.get();
     }
 
-    /** {@inheritDoc} */
-    public int getTotalConnections()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getTotalConnections() {
         return totalConnections.get();
     }
 
-    /** {@inheritDoc} */
-    public int getThreadsAwaitingConnection()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public int getThreadsAwaitingConnection() {
         return idleConnections.getWaitingConsumerCount();
     }
 
-    /** {@inheritDoc} */
-    public void closeIdleConnections()
-    {
+    /**
+     * {@inheritDoc}
+     */
+    public void closeIdleConnections() {
         final int idleCount = idleConnectionCount.get();
-        for (int i = 0; i < idleCount; i++)
-        {
+        for (int i = 0; i < idleCount; i++) {
             IHikariConnectionProxy connectionProxy = idleConnections.poll();
-            if (connectionProxy == null)
-            {
+            if (connectionProxy == null) {
                 break;
             }
 
             idleConnectionCount.decrementAndGet();
-            
+
             closeConnection(connectionProxy);
         }
     }
@@ -243,15 +223,13 @@ public final class HikariPool implements HikariPoolMBean
     // ***********************************************************************
     //                           Private methods
     // ***********************************************************************
-    
+
     /**
      * Fill the pool up to the minimum size.
      */
-    private void fillPool()
-    {
+    private void fillPool() {
         int maxIters = (configuration.getMinimumPoolSize() / configuration.getAcquireIncrement()) + 1;
-        while (totalConnections.get() < configuration.getMinimumPoolSize() && maxIters-- > 0)
-        {
+        while (totalConnections.get() < configuration.getMinimumPoolSize() && maxIters-- > 0) {
             addConnections();
         }
     }
@@ -259,12 +237,10 @@ public final class HikariPool implements HikariPoolMBean
     /**
      * Add connections to the pool, not exceeding the maximum allowed.
      */
-    private synchronized void addConnections()
-    {
+    private synchronized void addConnections() {
         final int max = configuration.getMaximumPoolSize();
         final int increment = configuration.getAcquireIncrement();
-        for (int i = 0; totalConnections.get() < max && i < increment; i++)
-        {
+        for (int i = 0; totalConnections.get() < max && i < increment; i++) {
             addConnection();
         }
     }
@@ -272,54 +248,39 @@ public final class HikariPool implements HikariPoolMBean
     /**
      * Create and add a single connection to the pool.
      */
-    private void addConnection()
-    {
+    private void addConnection() {
         int retries = 0;
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 Connection connection = dataSource.getConnection();
                 IHikariConnectionProxy proxyConnection;
-                if (delegationProxies)
-                {
+                if (delegationProxies) {
                     proxyConnection = (IHikariConnectionProxy) JavassistProxyFactoryFactory.getProxyFactory().getProxyConnection(connection);
-                }
-                else
-                {
+                } else {
                     proxyConnection = (IHikariConnectionProxy) connection;
                 }
 
                 proxyConnection.setParentPool(this);
 
                 boolean alive = isConnectionAlive((Connection) proxyConnection, configuration.getConnectionTimeout());
-                if (alive)
-                {
+                if (alive) {
                     connection.setAutoCommit(configuration.isAutoCommit());
                     idleConnectionCount.incrementAndGet();
                     totalConnections.incrementAndGet();
                     idleConnections.add(proxyConnection);
                     break;
-                }
-                else
-                {
+                } else {
                     Thread.sleep(configuration.getAcquireRetryDelay());
                 }
-            }
-            catch (Exception e)
-            {
-                if (retries++ > configuration.getAcquireRetries())
-                {
+            } catch (Exception e) {
+                if (retries++ > configuration.getAcquireRetries()) {
                     LOGGER.error("Maximum connection creation retries exceeded", e);
                     break;
                 }
 
-                try
-                {
+                try {
                     Thread.sleep(configuration.getAcquireRetryDelay());
-                }
-                catch (InterruptedException e1)
-                {
+                } catch (InterruptedException e1) {
                     break;
                 }
             }
@@ -330,38 +291,29 @@ public final class HikariPool implements HikariPoolMBean
      * Check whether the connection is alive or not.
      *
      * @param connection the connection to test
-     * @param timeoutMs the timeout before we consider the test a failure
+     * @param timeoutMs  the timeout before we consider the test a failure
      * @return true if the connection is alive, false if it is not alive or we timed out
      */
-    private boolean isConnectionAlive(final Connection connection, long timeoutMs)
-    {
+    private boolean isConnectionAlive(final Connection connection, long timeoutMs) {
         // Set a realistic minimum timeout
-        if (timeoutMs < 500)
-        {
+        if (timeoutMs < 500) {
             timeoutMs = 500;
         }
 
-        try
-        {
-            if (jdbc4ConnectionTest)
-            {
+        try {
+            if (jdbc4ConnectionTest) {
                 return connection.isValid((int) timeoutMs * 1000);
             }
 
             Statement statement = connection.createStatement();
-            try
-            {
+            try {
                 statement.executeQuery(configuration.getConnectionTestQuery());
-            }
-            finally
-            {
+            } finally {
                 statement.close();
             }
 
             return true;
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             LOGGER.error("Exception during keep alive check.  Connection must be dead.");
             return false;
         }
@@ -372,15 +324,11 @@ public final class HikariPool implements HikariPoolMBean
      *
      * @param connectionProxy the connection to actually close
      */
-    private void closeConnection(IHikariConnectionProxy connectionProxy)
-    {
-        try
-        {
+    private void closeConnection(IHikariConnectionProxy connectionProxy) {
+        try {
             totalConnections.decrementAndGet();
             connectionProxy.__close();
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             return;
         }
     }
@@ -388,26 +336,19 @@ public final class HikariPool implements HikariPoolMBean
     /**
      * Register the pool and pool configuration objects with the MBean server.
      */
-    private void registerMBean()
-    {
-        try
-        {
+    private void registerMBean() {
+        try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            
+
             ObjectName poolConfigName = new ObjectName("com.zaxxer.hikari:type=PoolConfig (" + configuration.getPoolName() + ")");
             ObjectName poolName = new ObjectName("com.zaxxer.hikari:type=Pool (" + configuration.getPoolName() + ")");
-            if (!mBeanServer.isRegistered(poolConfigName))
-            {
+            if (!mBeanServer.isRegistered(poolConfigName)) {
                 mBeanServer.registerMBean(configuration, poolConfigName);
                 mBeanServer.registerMBean(this, poolName);
-            }
-            else
-            {
+            } else {
                 LOGGER.error("You cannot use the same HikariConfig for separate pool instances.");
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             LOGGER.warn("Unable to register management beans.", e);
         }
     }
@@ -415,10 +356,8 @@ public final class HikariPool implements HikariPoolMBean
     /**
      * The house keeping task to retire idle and maxAge connections.
      */
-    private class HouseKeeper extends TimerTask
-    {
-        public void run()
-        {
+    private class HouseKeeper extends TimerTask {
+        public void run() {
             houseKeepingTimer.purge();
 
             final long now = System.currentTimeMillis();
@@ -426,24 +365,19 @@ public final class HikariPool implements HikariPoolMBean
             final long maxLifetime = configuration.getMaxLifetime();
             final int idleCount = idleConnectionCount.get();
 
-            for (int i = 0; i < idleCount; i++)
-            {
+            for (int i = 0; i < idleCount; i++) {
                 IHikariConnectionProxy connectionProxy = idleConnections.poll();
-                if (connectionProxy == null)
-                {
+                if (connectionProxy == null) {
                     break;
                 }
 
                 idleConnectionCount.decrementAndGet();
 
                 if ((idleTimeout > 0 && now > connectionProxy.getLastAccess() + idleTimeout)
-                    ||
-                    (maxLifetime > 0 && now > connectionProxy.getCreationTime() + maxLifetime))
-                {
+                        ||
+                        (maxLifetime > 0 && now > connectionProxy.getCreationTime() + maxLifetime)) {
                     closeConnection(connectionProxy);
-                }
-                else
-                {
+                } else {
                     idleConnectionCount.incrementAndGet();
                     idleConnections.add(connectionProxy);
                 }
