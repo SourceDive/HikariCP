@@ -40,6 +40,7 @@
 
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <tools.jar.path>${env.JAVA_HOME}/lib/tools.jar</tools.jar.path>
    </properties>
 
    <parent>
@@ -101,7 +102,8 @@
          <artifactId>tools</artifactId>
          <version>1.6.0</version>
          <scope>system</scope>
-         <systemPath>${java.home}/../lib/tools.jar</systemPath>
+         <systemPath>${tools.jar.path}</systemPath>
+         <optional>true</optional>
       </dependency>
       <dependency>
       	<groupId>org.javassist</groupId>
