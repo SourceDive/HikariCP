@@ -149,6 +149,7 @@ public interface HikariConfigMBean {
     void setMaxLifetime(long maxLifetimeMs);
 
     /**
+     * <p>连接池最大连接数。</p>
      * The property controls the maximum size that the pool is allowed to reach, including both idle and in-use
      * connections. Basically this value will determine the maximum number of actual connections to the database
      * backend.
@@ -161,6 +162,7 @@ public interface HikariConfigMBean {
     int getMinimumPoolSize();
 
     /**
+     * <p>连接池最小连接数。</p>
      * The property controls the minimum number of connections that HikariCP tries to maintain in the pool,
      * including both idle and in-use connections. If the connections dip below this value, HikariCP will
      * make a best effort to restore them quickly and efficiently.

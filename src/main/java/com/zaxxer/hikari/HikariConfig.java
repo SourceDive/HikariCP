@@ -295,6 +295,9 @@ public final class HikariConfig implements HikariConfigMBean {
         this.poolName = poolName;
     }
 
+    /**
+     * 配置合法性检查。
+     */
     public void validate() {
         Logger logger = LoggerFactory.getLogger(getClass());
 

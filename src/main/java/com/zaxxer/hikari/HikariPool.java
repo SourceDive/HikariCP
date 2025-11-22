@@ -49,8 +49,8 @@ public final class HikariPool implements HikariPoolMBean {
     private final HikariConfig configuration;
     private final LinkedTransferQueue<IHikariConnectionProxy> idleConnections;
 
-    private final AtomicInteger totalConnections;
-    private final AtomicInteger idleConnectionCount;
+    private final AtomicInteger totalConnections; // 总连接数量
+    private final AtomicInteger idleConnectionCount; // 空闲连接数量
     private final DataSource dataSource;
     private final long leakDetectionThreshold;
     private final boolean jdbc4ConnectionTest;
@@ -64,6 +64,7 @@ public final class HikariPool implements HikariPoolMBean {
      * @param configuration a HikariConfig instance
      */
     HikariPool(HikariConfig configuration) {
+        // 配置合法性检查。
         configuration.validate();
 
         this.configuration = configuration;
@@ -90,6 +91,7 @@ public final class HikariPool implements HikariPoolMBean {
 
         registerMBean();
 
+        // 启动内务整理 daemon 线程。
         houseKeepingTimer = new Timer("Hikari Housekeeping Timer", true);
 
         long idleTimeout = configuration.getIdleTimeout();
@@ -97,6 +99,7 @@ public final class HikariPool implements HikariPoolMBean {
             houseKeepingTimer.scheduleAtFixedRate(new HouseKeeper(), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
         }
 
+        // 填满连接池。
         fillPool();
     }
 
@@ -111,16 +114,19 @@ public final class HikariPool implements HikariPoolMBean {
             long timeout = configuration.getConnectionTimeout();
             final long start = System.currentTimeMillis();
             do {
+                // 无空闲连接，增加连接。
                 if (idleConnectionCount.get() == 0) {
                     addConnections();
                 }
 
+                // 从队列中取出一个连接。
                 IHikariConnectionProxy connectionProxy = idleConnections.poll(timeout, TimeUnit.MILLISECONDS);
                 if (connectionProxy == null) {
                     LOGGER.error("Timeout of {}ms encountered waiting for connection", configuration.getConnectionTimeout());
                     throw new SQLException("Timeout of encountered waiting for connection");
                 }
 
+                // 空闲连接数量-1
                 idleConnectionCount.decrementAndGet();
 
                 final long maxLifetime = configuration.getMaxLifetime();
@@ -156,6 +162,7 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>释放连接到连接池中。</p>
      * Release a connection back to the pool, or permanently close it if it
      * is broken.
      *
@@ -165,7 +172,7 @@ public final class HikariPool implements HikariPoolMBean {
         if (!connectionProxy.isBrokenConnection()) {
             connectionProxy.markLastAccess();
             idleConnectionCount.incrementAndGet();
-            idleConnections.put(connectionProxy);
+            idleConnections.put(connectionProxy); // 将连接放回到队列中。
         } else {
             closeConnection(connectionProxy);
         }
@@ -235,6 +242,7 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>向连接池中增加连接。</p>
      * Add connections to the pool, not exceeding the maximum allowed.
      */
     private synchronized void addConnections() {
@@ -252,7 +260,10 @@ public final class HikariPool implements HikariPoolMBean {
         int retries = 0;
         while (true) {
             try {
+                // 从目标数据源取出一个真实连接。
                 Connection connection = dataSource.getConnection();
+
+                // 构造代理连接。
                 IHikariConnectionProxy proxyConnection;
                 if (delegationProxies) {
                     proxyConnection = (IHikariConnectionProxy) JavassistProxyFactoryFactory.getProxyFactory().getProxyConnection(connection);
@@ -260,13 +271,18 @@ public final class HikariPool implements HikariPoolMBean {
                     proxyConnection = (IHikariConnectionProxy) connection;
                 }
 
+                // 设置所属连接池。
                 proxyConnection.setParentPool(this);
 
                 boolean alive = isConnectionAlive((Connection) proxyConnection, configuration.getConnectionTimeout());
                 if (alive) {
                     connection.setAutoCommit(configuration.isAutoCommit());
+                    // 空闲数量+1
                     idleConnectionCount.incrementAndGet();
+                    // 总数+1
                     totalConnections.incrementAndGet();
+
+                    // 代理连接添加到空闲连接集合。
                     idleConnections.add(proxyConnection);
                     break;
                 } else {
@@ -288,6 +304,7 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>检查连接是否存活。</p>
      * Check whether the connection is alive or not.
      *
      * @param connection the connection to test
@@ -320,6 +337,7 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>关闭一个连接。</p>
      * Permanently close a connection.
      *
      * @param connectionProxy the connection to actually close
@@ -354,6 +372,8 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>内务整理，相当于有个后台线程去处理内部的事务。</p>
+     * <p>作用：非法连接剔除，向连接池中补充连接。</p>
      * The house keeping task to retire idle and maxAge connections.
      */
     private class HouseKeeper extends TimerTask {
@@ -366,6 +386,7 @@ public final class HikariPool implements HikariPoolMBean {
             final int idleCount = idleConnectionCount.get();
 
             for (int i = 0; i < idleCount; i++) {
+                // 连接池中无空闲连接，直接退出。
                 IHikariConnectionProxy connectionProxy = idleConnections.poll();
                 if (connectionProxy == null) {
                     break;

@@ -24,6 +24,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
+ * <p>mock 数据源。</p>
  *
  * @author Brett Wooldridge
  */

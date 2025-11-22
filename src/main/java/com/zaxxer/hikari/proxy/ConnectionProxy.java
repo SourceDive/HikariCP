@@ -51,7 +51,7 @@ public class ConnectionProxy implements IHikariConnectionProxy {
     @HikariInject
     private HikariPool _parentPool;
 
-    protected final Connection delegate;
+    protected final Connection delegate; // 目标连接
 
     @HikariInject
     private volatile boolean _forceClose;

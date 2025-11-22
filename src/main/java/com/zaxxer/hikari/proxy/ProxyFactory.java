@@ -18,6 +18,9 @@ package com.zaxxer.hikari.proxy;
 
 import java.sql.*;
 
+/**
+ * 代理对象工厂。
+ */
 public abstract class ProxyFactory {
     /* Classes should use ProxyFactory.INSTANCE to access the factory */
     // final ProxyFactory INSTANCE = Initializer.initialize();

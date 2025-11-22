@@ -29,6 +29,9 @@ import java.util.Timer;
 public interface IHikariConnectionProxy {
     void unclose();
 
+    /**
+     * 关闭物理连接。
+     */
     void __close() throws SQLException;
 
     void unregisterStatement(Object statement);

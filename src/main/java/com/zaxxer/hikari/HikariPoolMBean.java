@@ -22,10 +22,16 @@ package com.zaxxer.hikari;
  * @author Brett Wooldridge
  */
 public interface HikariPoolMBean {
+    /**
+     * 获取空闲连接数量。
+     */
     int getIdleConnections();
 
     int getActiveConnections();
 
+    /**
+     * 获取总连接数量。
+     */
     int getTotalConnections();
 
     int getThreadsAwaitingConnection();
