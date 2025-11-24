@@ -64,9 +64,10 @@ public final class HikariPool implements HikariPoolMBean {
      * @param configuration a HikariConfig instance
      */
     HikariPool(HikariConfig configuration) {
-        // 配置合法性检查。
+        // 检查配置合法性。
         configuration.validate();
 
+        // 赋值配置属性。
         this.configuration = configuration;
         this.totalConnections = new AtomicInteger();
         this.idleConnectionCount = new AtomicInteger();
@@ -89,6 +90,7 @@ public final class HikariPool implements HikariPoolMBean {
             throw new RuntimeException("Could not create datasource class: " + configuration.getDataSourceClassName(), e);
         }
 
+        // 注册 MBean(可以在jconsole中展示监控信息)。
         registerMBean();
 
         // 启动内务整理 daemon 线程。
@@ -352,6 +354,7 @@ public final class HikariPool implements HikariPoolMBean {
     }
 
     /**
+     * <p>将连接池对象和连接池配置对象注册为 MBean.</p>
      * Register the pool and pool configuration objects with the MBean server.
      */
     private void registerMBean() {
