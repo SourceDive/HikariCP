@@ -231,6 +231,7 @@ public final class HikariConfig implements HikariConfigMBean {
     }
 
     /**
+     * <p>最大存活时间。</p>
      * {@inheritDoc}
      */
     public long getMaxLifetime() {
