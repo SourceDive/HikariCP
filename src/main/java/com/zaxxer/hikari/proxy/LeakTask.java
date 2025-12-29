@@ -16,43 +16,41 @@
 
 package com.zaxxer.hikari.proxy;
 
-import java.util.TimerTask;
-
 import org.slf4j.LoggerFactory;
+
+import java.util.TimerTask;
 
 /**
  * @author Brett Wooldridge
  */
-class LeakTask extends TimerTask
-{
-   private final long leakTime;
-   private StackTraceElement[] stackTrace;
+class LeakTask extends TimerTask {
+    private final long leakTime;
+    private StackTraceElement[] stackTrace;
 
-   public LeakTask(StackTraceElement[] stackTrace, long leakDetectionThreshold)
-   {
-      this.stackTrace = stackTrace;
-      this.leakTime = System.currentTimeMillis() + leakDetectionThreshold;
-   }
+    public LeakTask(StackTraceElement[] stackTrace, long leakDetectionThreshold) {
+        this.stackTrace = stackTrace;
+        this.leakTime = System.currentTimeMillis() + leakDetectionThreshold;
+    }
 
-   /** {@inheritDoc} */
-   @Override
-   public void run()
-   {
-      if (System.currentTimeMillis() > leakTime) {
-         Exception e = new Exception();
-         e.setStackTrace(stackTrace);
-         LoggerFactory.getLogger(LeakTask.class).warn("Connection leak detection triggered, stack trace follows", e);
-         stackTrace = null;
-      }
-   }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+        if (System.currentTimeMillis() > leakTime) {
+            Exception e = new Exception();
+            e.setStackTrace(stackTrace);
+            LoggerFactory.getLogger(LeakTask.class).warn("Connection leak detection triggered, stack trace follows", e);
+            stackTrace = null;
+        }
+    }
 
-   @Override
-   public boolean cancel()
-   {
-      boolean cancelled = super.cancel();
-      if (cancelled) {
-         stackTrace = null;
-      }
-      return cancelled;
-   }
+    @Override
+    public boolean cancel() {
+        boolean cancelled = super.cancel();
+        if (cancelled) {
+            stackTrace = null;
+        }
+        return cancelled;
+    }
 }

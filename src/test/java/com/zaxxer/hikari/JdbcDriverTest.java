@@ -15,28 +15,24 @@
  */
 package com.zaxxer.hikari;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import com.zaxxer.hikari.util.DriverDataSource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.zaxxer.hikari.util.DriverDataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public class JdbcDriverTest
-{
+public class JdbcDriverTest {
     private HikariDataSource ds;
 
     @After
-    public void teardown()
-    {
+    public void teardown() {
         ds.shutdown();
     }
 
     @Test
-    public void driverTest1() throws SQLException
-    {
+    public void driverTest1() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(1);

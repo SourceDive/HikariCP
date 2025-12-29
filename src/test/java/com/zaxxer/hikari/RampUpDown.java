@@ -1,16 +1,14 @@
 package com.zaxxer.hikari;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-public class RampUpDown
-{
+import java.sql.Connection;
+import java.sql.SQLException;
+
+public class RampUpDown {
     @Test
-    public void rampUpDownTest() throws SQLException, InterruptedException
-    {
+    public void rampUpDownTest() throws SQLException, InterruptedException {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(5);
         config.setMaximumPoolSize(60);
@@ -26,15 +24,13 @@ public class RampUpDown
         Assert.assertSame("Totals connections not as expected", 5, TestElf.getPool(ds).getTotalConnections());
 
         Connection[] connections = new Connection[ds.getMaximumPoolSize()];
-        for (int i = 0; i < connections.length; i++)
-        {
+        for (int i = 0; i < connections.length; i++) {
             connections[i] = ds.getConnection();
         }
 
         Assert.assertSame("Totals connections not as expected", 60, TestElf.getPool(ds).getTotalConnections());
 
-        for (Connection connection : connections)
-        {
+        for (Connection connection : connections) {
             connection.close();
         }
 

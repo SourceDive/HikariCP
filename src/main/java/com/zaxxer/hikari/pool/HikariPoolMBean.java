@@ -21,15 +21,14 @@ package com.zaxxer.hikari.pool;
  *
  * @author Brett Wooldridge
  */
-public interface HikariPoolMBean
-{
-   int getIdleConnections();
+public interface HikariPoolMBean {
+    int getIdleConnections();
 
-   int getActiveConnections();
+    int getActiveConnections();
 
-   int getTotalConnections();
+    int getTotalConnections();
 
-   int getThreadsAwaitingConnection();
+    int getThreadsAwaitingConnection();
 
-   void closeIdleConnections();
+    void closeIdleConnections();
 }

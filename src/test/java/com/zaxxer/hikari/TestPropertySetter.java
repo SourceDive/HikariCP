@@ -1,22 +1,18 @@
 package com.zaxxer.hikari;
 
+import com.zaxxer.hikari.util.PropertyBeanSetter;
+import org.junit.Assert;
+import org.junit.Test;
+
+import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.zaxxer.hikari.util.PropertyBeanSetter;
-
-public class TestPropertySetter
-{
+public class TestPropertySetter {
     @Test
-    public void testProperty1()
-    {
+    public void testProperty1() {
         File file = new File("src/test/resources/propfile1.properties");
         HikariConfig config = new HikariConfig(file.getPath());
         config.validate();
@@ -26,8 +22,7 @@ public class TestPropertySetter
     }
 
     @Test
-    public void testProperty2() throws Exception
-    {
+    public void testProperty2() throws Exception {
         File file = new File("src/test/resources/propfile2.properties");
         HikariConfig config = new HikariConfig(file.getPath());
         config.validate();
@@ -38,8 +33,7 @@ public class TestPropertySetter
     }
 
     @Test
-    public void testObjectProperty() throws Exception
-    {
+    public void testObjectProperty() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("com.zaxxer.hikari.mocks.StubDataSource");
         PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());
@@ -53,8 +47,7 @@ public class TestPropertySetter
     }
 
     @Test
-    public void testPropertyUpperCase() throws Exception
-    {
+    public void testPropertyUpperCase() throws Exception {
         File file = new File("src/test/resources/propfile3.properties");
         HikariConfig config = new HikariConfig(file.getPath());
         config.validate();
@@ -65,8 +58,7 @@ public class TestPropertySetter
     }
 
     @Test
-    public void testGetPropertyNames() throws Exception
-    {
+    public void testGetPropertyNames() throws Exception {
         Set<String> propertyNames = PropertyBeanSetter.getPropertyNames(HikariConfig.class);
         Assert.assertTrue(propertyNames.contains("dataSourceClassName"));
     }

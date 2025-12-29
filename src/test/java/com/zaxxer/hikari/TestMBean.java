@@ -15,15 +15,13 @@
  */
 package com.zaxxer.hikari;
 
-import java.sql.SQLException;
-
 import org.junit.Test;
 
-public class TestMBean
-{
+import java.sql.SQLException;
+
+public class TestMBean {
     @Test
-    public void testMBeanRegistration() throws SQLException
-    {
+    public void testMBeanRegistration() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(0);
         config.setMaximumPoolSize(1);

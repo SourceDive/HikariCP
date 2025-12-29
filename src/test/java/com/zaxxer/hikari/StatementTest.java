@@ -1,21 +1,19 @@
 package com.zaxxer.hikari;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class StatementTest
-{
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class StatementTest {
     private HikariDataSource ds;
 
     @Before
-    public void setup()
-    {
+    public void setup() {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(2);
@@ -27,14 +25,12 @@ public class StatementTest
     }
 
     @After
-    public void teardown()
-    {
+    public void teardown() {
         ds.shutdown();
     }
 
     @Test
-    public void testStatementClose() throws SQLException
-    {
+    public void testStatementClose() throws SQLException {
         Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
         Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
 
@@ -53,8 +49,7 @@ public class StatementTest
     }
 
     @Test
-    public void testAutoStatementClose() throws SQLException
-    {
+    public void testAutoStatementClose() throws SQLException {
         Connection connection = ds.getConnection();
         Assert.assertNotNull(connection);
 
@@ -70,8 +65,7 @@ public class StatementTest
     }
 
     @Test
-    public void testDoubleStatementClose() throws SQLException
-    {
+    public void testDoubleStatementClose() throws SQLException {
         Connection connection = ds.getConnection();
 
         Statement statement1 = connection.createStatement();
@@ -83,8 +77,7 @@ public class StatementTest
     }
 
     @Test
-    public void testOutOfOrderStatementClose() throws SQLException
-    {
+    public void testOutOfOrderStatementClose() throws SQLException {
         Connection connection = ds.getConnection();
 
         Statement statement1 = connection.createStatement();
@@ -94,5 +87,5 @@ public class StatementTest
         statement2.close();
 
         connection.close();
-    }    
+    }
 }

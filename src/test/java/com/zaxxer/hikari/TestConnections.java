@@ -16,30 +16,27 @@
 
 package com.zaxxer.hikari;
 
+import com.zaxxer.hikari.mocks.StubConnection;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.zaxxer.hikari.mocks.StubConnection;
-
 /**
  * System property testProxy can be one of:
- *    "com.zaxxer.hikari.JavaProxyFactory"
- *    "com.zaxxer.hikari.CglibProxyFactory"
- *    "com.zaxxer.hikari.JavassistProxyFactory"
+ * "com.zaxxer.hikari.JavaProxyFactory"
+ * "com.zaxxer.hikari.CglibProxyFactory"
+ * "com.zaxxer.hikari.JavassistProxyFactory"
  *
  * @author Brett Wooldridge
  */
-public class TestConnections
-{
+public class TestConnections {
     @Test
-    public void testCreate() throws SQLException
-    {
+    public void testCreate() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(1);
@@ -48,43 +45,39 @@ public class TestConnections
         config.setDataSourceClassName("com.zaxxer.hikari.mocks.StubDataSource");
 
         HikariDataSource ds = new HikariDataSource(config);
-        try
-        {
+        try {
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-    
+
             Connection connection = ds.getConnection();
             Assert.assertNotNull(connection);
-    
+
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
-    
+
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM device WHERE device_id=?");
             Assert.assertNotNull(statement);
-    
+
             statement.setInt(1, 0);
-    
+
             ResultSet resultSet = statement.executeQuery();
             Assert.assertNotNull(resultSet);
-    
+
             Assert.assertFalse(resultSet.next());
-    
+
             resultSet.close();
             statement.close();
             connection.close();
-    
+
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }
 
     @Test
-    public void testMaxLifetime() throws Exception
-    {
+    public void testMaxLifetime() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(0);
         config.setMaximumPoolSize(1);
@@ -96,24 +89,23 @@ public class TestConnections
 
         HikariDataSource ds = new HikariDataSource(config);
 
-        try
-        {
+        try {
             System.clearProperty("com.zaxxer.hikari.housekeeping.periodMs");
-    
+
             ds.setMaxLifetime(700);
-    
+
             Assert.assertSame("Total connections not as expected", 0, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
-    
+
             Connection connection = ds.getConnection();
             Assert.assertNotNull(connection);
-    
+
             Assert.assertSame("Second total connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Second idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
             connection.close();
-    
+
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-    
+
             Connection connection2 = ds.getConnection();
             Assert.assertSame("Expected the same connection", connection, connection2);
             Assert.assertSame("Second total connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
@@ -124,21 +116,18 @@ public class TestConnections
 
             connection2 = ds.getConnection();
             Assert.assertNotSame("Expected a different connection", connection, connection2);
-    
+
             connection2.close();
-    
+
             Assert.assertSame("Post total connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Post idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }
 
     @Test
-    public void testMaxLifetime2() throws Exception
-    {
+    public void testMaxLifetime2() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(0);
         config.setMaximumPoolSize(1);
@@ -148,20 +137,19 @@ public class TestConnections
 
         HikariDataSource ds = new HikariDataSource(config);
 
-        try
-        {
+        try {
             ds.setMaxLifetime(700);
 
             Assert.assertSame("Total connections not as expected", 0, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
-    
+
             Connection connection = ds.getConnection();
             Assert.assertNotNull(connection);
-    
+
             Assert.assertSame("Second total connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Second idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
             connection.close();
-    
+
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
 
             Connection connection2 = ds.getConnection();
@@ -174,21 +162,18 @@ public class TestConnections
 
             connection2 = ds.getConnection();
             Assert.assertNotSame("Expected a different connection", connection, connection2);
-    
+
             connection2.close();
-    
+
             Assert.assertSame("Post total connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Post idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }
 
     @Test
-    public void testDoubleClose() throws Exception
-    {
+    public void testDoubleClose() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(1);
@@ -197,21 +182,17 @@ public class TestConnections
         config.setDataSourceClassName("com.zaxxer.hikari.mocks.StubDataSource");
 
         HikariDataSource ds = new HikariDataSource(config);
-        try
-        {
+        try {
             Connection connection = ds.getConnection();
             connection.close();
             connection.close();
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }
 
     @Test
-    public void testBackfill() throws Exception
-    {
+    public void testBackfill() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(4);
@@ -221,37 +202,33 @@ public class TestConnections
         config.setDataSourceClassName("com.zaxxer.hikari.mocks.StubDataSource");
 
         HikariDataSource ds = new HikariDataSource(config);
-        try
-        {
+        try {
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-    
+
             // This will take the pool down to zero
             Connection connection = ds.getConnection();
             Assert.assertNotNull(connection);
-    
+
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
-    
+
             PreparedStatement statement = connection.prepareStatement("SELECT some, thing FROM somewhere WHERE something=?");
             Assert.assertNotNull(statement);
-    
+
             ResultSet resultSet = statement.executeQuery();
             Assert.assertNotNull(resultSet);
-    
-            try
-            {
+
+            try {
                 statement.getMaxFieldSize();
                 Assert.fail();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Assert.assertSame(SQLException.class, e.getClass());
             }
-    
+
             // The connection will be ejected from the pool here
             connection.close();
-    
+
             Assert.assertSame("Totals connections not as expected", 0, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 0, TestElf.getPool(ds).getIdleConnections());
 
@@ -261,16 +238,13 @@ public class TestConnections
 
             Assert.assertSame("Totals connections not as expected", 1, TestElf.getPool(ds).getTotalConnections());
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }
 
     @Test
-    public void testMaximumPoolLimit() throws Exception
-    {
+    public void testMaximumPoolLimit() throws Exception {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(4);
@@ -282,43 +256,33 @@ public class TestConnections
         StubConnection.count.set(0);
 
         final HikariDataSource ds = new HikariDataSource(config);
-        try
-        {
+        try {
             Thread[] threads = new Thread[20];
-            for (int i = 0; i < threads.length; i++)
-            {
+            for (int i = 0; i < threads.length; i++) {
                 threads[i] = new Thread(new Runnable() {
-                    public void run()
-                    {
-                        try
-                        {
+                    public void run() {
+                        try {
                             Connection connection = ds.getConnection();
                             Thread.sleep(1000);
                             connection.close();
-                        }
-                        catch (Exception e)
-                        {
+                        } catch (Exception e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
                 });
             }
-    
-            for (int i = 0; i < threads.length; i++)
-            {
+
+            for (int i = 0; i < threads.length; i++) {
                 threads[i].start();
             }
-    
-            for (int i = 0; i < threads.length; i++)
-            {
+
+            for (int i = 0; i < threads.length; i++) {
                 threads[i].join();
             }
-    
+
             Assert.assertEquals(4, StubConnection.count.get());
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }

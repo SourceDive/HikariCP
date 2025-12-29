@@ -16,38 +16,33 @@
 
 package com.zaxxer.hikari;
 
-import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
-
+import com.zaxxer.hikari.mocks.StubConnection;
+import com.zaxxer.hikari.pool.HikariPool;
+import com.zaxxer.hikari.util.PoolUtilities;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.zaxxer.hikari.mocks.StubConnection;
-import com.zaxxer.hikari.pool.HikariPool;
-import com.zaxxer.hikari.util.PoolUtilities;
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Brett Wooldridge
  */
-public class ShutdownTest
-{
+public class ShutdownTest {
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         StubConnection.count.set(0);
     }
 
     @After
-    public void afterTest()
-    {
+    public void afterTest() {
         StubConnection.slowCreate = false;
     }
 
     @Test
-    public void testShutdown1() throws SQLException
-    {
+    public void testShutdown1() throws SQLException {
         Assert.assertSame("StubConnection count not as expected", 0, StubConnection.count.get());
 
         StubConnection.slowCreate = true;
@@ -63,19 +58,14 @@ public class ShutdownTest
         HikariPool pool = TestElf.getPool(ds);
 
         Thread[] threads = new Thread[10];
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             threads[i] = new Thread() {
                 public void run() {
-                    try
-                    {
-                        if (ds.getConnection() != null)
-                        {
+                    try {
+                        if (ds.getConnection() != null) {
                             PoolUtilities.quietlySleep(TimeUnit.SECONDS.toMillis(1));
                         }
-                    }
-                    catch (SQLException e)
-                    {
+                    } catch (SQLException e) {
                     }
                 }
             };
@@ -86,7 +76,7 @@ public class ShutdownTest
         PoolUtilities.quietlySleep(300);
 
         Assert.assertTrue("Totals connection count not as expected, ", pool.getTotalConnections() > 0);
-        
+
         ds.shutdown();
 
         Assert.assertSame("Active connection count not as expected, ", 0, pool.getActiveConnections());
@@ -95,8 +85,7 @@ public class ShutdownTest
     }
 
     @Test
-    public void testShutdown2() throws SQLException
-    {
+    public void testShutdown2() throws SQLException {
         Assert.assertSame("StubConnection count not as expected", 0, StubConnection.count.get());
 
         StubConnection.slowCreate = true;
@@ -114,7 +103,7 @@ public class ShutdownTest
         PoolUtilities.quietlySleep(300);
 
         Assert.assertTrue("Totals connection count not as expected, ", pool.getTotalConnections() > 0);
-        
+
         ds.shutdown();
 
         Assert.assertSame("Active connection count not as expected, ", 0, pool.getActiveConnections());
@@ -123,8 +112,7 @@ public class ShutdownTest
     }
 
     @Test
-    public void testShutdown3() throws SQLException
-    {
+    public void testShutdown3() throws SQLException {
         Assert.assertSame("StubConnection count not as expected", 0, StubConnection.count.get());
 
         StubConnection.slowCreate = true;
@@ -142,19 +130,18 @@ public class ShutdownTest
         PoolUtilities.quietlySleep(300);
 
         Assert.assertTrue("Totals connection count not as expected, ", pool.getTotalConnections() > 0);
-        
+
         ds.shutdown();
 
         Assert.assertSame("Active connection count not as expected, ", 0, pool.getActiveConnections());
         Assert.assertSame("Idle connection count not as expected, ", 0, pool.getIdleConnections());
         Assert.assertSame("Total connection count not as expected", 0, pool.getTotalConnections());
     }
-    
+
     @Test
-    public void testShutdown4() throws SQLException
-    {
+    public void testShutdown4() throws SQLException {
         StubConnection.slowCreate = true;
-        
+
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(10);
         config.setMaximumPoolSize(10);
@@ -169,25 +156,22 @@ public class ShutdownTest
         ds.shutdown();
 
         long start = System.currentTimeMillis();
-        while (PoolUtilities.elapsedTimeMs(start) < TimeUnit.SECONDS.toMillis(5) && threadCount() > 0)
-        {
+        while (PoolUtilities.elapsedTimeMs(start) < TimeUnit.SECONDS.toMillis(5) && threadCount() > 0) {
             PoolUtilities.quietlySleep(250);
         }
 
         Assert.assertSame("Thread was leaked", 0, threadCount());
     }
 
-	private int threadCount()
-	{
-	    Thread[] threads = new Thread[Thread.activeCount() * 2];
-	    Thread.enumerate(threads);
+    private int threadCount() {
+        Thread[] threads = new Thread[Thread.activeCount() * 2];
+        Thread.enumerate(threads);
 
-	    int count = 0;
-	    for (Thread thread : threads)
-	    {
-	        count += (thread != null && thread.getName().startsWith("Hikari")) ? 1 : 0;
-	    }
+        int count = 0;
+        for (Thread thread : threads) {
+            count += (thread != null && thread.getName().startsWith("Hikari")) ? 1 : 0;
+        }
 
-	    return count;
-	}
+        return count;
+    }
 }

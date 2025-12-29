@@ -16,22 +16,19 @@
 
 package com.zaxxer.hikari;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import com.zaxxer.hikari.mocks.StubConnection;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.zaxxer.hikari.mocks.StubConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author Brett Wooldridge
  */
-public class UnwrapTest
-{
+public class UnwrapTest {
     @Test
-    public void testUnwrapConnection() throws SQLException
-    {
+    public void testUnwrapConnection() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(1);
@@ -41,18 +38,15 @@ public class UnwrapTest
 
         HikariDataSource ds = new HikariDataSource(config);
 
-        try
-        {
+        try {
             Assert.assertSame("Idle connections not as expected", 1, TestElf.getPool(ds).getIdleConnections());
-    
+
             Connection connection = ds.getConnection();
             Assert.assertNotNull(connection);
-    
+
             StubConnection unwrapped = connection.unwrap(StubConnection.class);
             Assert.assertTrue("unwrapped connection is not instance of StubConnection: " + unwrapped, (unwrapped != null && unwrapped instanceof StubConnection));
-        }
-        finally
-        {
+        } finally {
             ds.shutdown();
         }
     }

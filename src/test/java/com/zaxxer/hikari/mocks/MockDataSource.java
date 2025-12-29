@@ -16,82 +16,61 @@
 
 package com.zaxxer.hikari.mocks;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.PrintWriter;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.logging.Logger;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  *
  * @author Brett Wooldridge
  */
-public class MockDataSource implements DataSource
-{
+public class MockDataSource implements DataSource {
     @Override
-    public Connection getConnection() throws SQLException
-    {
+    public Connection getConnection() throws SQLException {
         return createMockConnection();
     }
 
     @Override
-    public Connection getConnection(String username, String password) throws SQLException
-    {
+    public Connection getConnection(String username, String password) throws SQLException {
         return getConnection();
     }
 
     @Override
-    public PrintWriter getLogWriter() throws SQLException
-    {
+    public PrintWriter getLogWriter() throws SQLException {
         return null;
     }
 
     @Override
-    public void setLogWriter(PrintWriter out) throws SQLException
-    {
+    public void setLogWriter(PrintWriter out) throws SQLException {
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException
-    {
+    public void setLoginTimeout(int seconds) throws SQLException {
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException
-    {
+    public int getLoginTimeout() throws SQLException {
         return 0;
     }
 
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException
-    {
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException
-    {
+    public <T> T unwrap(Class<T> iface) throws SQLException {
         return null;
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException
-    {
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
 
@@ -119,8 +98,7 @@ public class MockDataSource implements DataSource
         when(mockConnection.prepareStatement(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(mockPreparedStatement);
         doAnswer(new Answer<Void>() {
             @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable
-            {
+            public Void answer(InvocationOnMock invocation) throws Throwable {
                 return null;
             }
         }).doNothing().when(mockPreparedStatement).setInt(anyInt(), anyInt());

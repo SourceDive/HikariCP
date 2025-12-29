@@ -5,19 +5,20 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public abstract class StubBaseConnection implements Connection
-{
-    /** {@inheritDoc} */
+public abstract class StubBaseConnection implements Connection {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Statement createStatement() throws SQLException
-    {
+    public Statement createStatement() throws SQLException {
         return new StubStatement(this);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public PreparedStatement prepareStatement(String sql) throws SQLException
-    {
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
         return new StubPreparedStatement(this);
     }
 }
