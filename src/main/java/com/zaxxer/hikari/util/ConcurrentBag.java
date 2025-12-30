@@ -84,6 +84,7 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
     }
 
     /**
+     * <p>借用</p>
      * The method will borrow an IBagManagable from the bag, blocking for the
      * specified timeout if none are available.
      *
@@ -132,6 +133,7 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
     }
 
     /**
+     * <p>归还。</p>
      * This method will return a borrowed object to the bag.  Objects
      * that are borrowed from the bag but never "requited" will result
      * in a memory leak.
