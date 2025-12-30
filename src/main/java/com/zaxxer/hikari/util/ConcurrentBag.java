@@ -89,19 +89,22 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
      * The method will borrow an IBagManagable from the bag, blocking for the
      * specified timeout if none are available.
      *
-     * @param timeout  how long to wait before giving up, in units of unit
+     * @param timeout  how long to wait before giving up, in units of unit 连接超时时间
      * @param timeUnit a <code>TimeUnit</code> determining how to interpret the timeout parameter
      * @return a borrowed instance from the bag or null if a timeout occurs
      * @throws InterruptedException if interrupted while waiting
      */
     public T borrow(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        // 1、先查本地
+        // 1、先查线程本地
         // Try the thread-local list first
         FastList<WeakReference<T>> list = threadList.get();
+        // 当前线程还没绑定集合，初始化
         if (list == null) {
             list = new FastList<WeakReference<T>>(WeakReference.class);
             threadList.set(list);
         } else {
+            // 绑定了集合
+            // 从后往前遍历，找到未使用的连接
             for (int i = list.size() - 1; i >= 0; i--) {
                 final WeakReference<T> reference = list.removeLast();
                 final T element = reference.get();
@@ -152,12 +155,15 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
 
         if (value.compareAndSetState(STATE_IN_USE, STATE_NOT_IN_USE)) {
             FastList<WeakReference<T>> list = threadList.get();
+            // 当前线程还没绑定集合，初始化
             if (list == null) {
                 list = new FastList<WeakReference<T>>(WeakReference.class);
                 threadList.set(list);
             }
 
+            // 归还的连接添加到本地
             list.add(new WeakReference<T>(value));
+
             synchronizer.releaseShared(System.nanoTime());
         } else {
             throw new IllegalStateException("Value was returned to the bag that was not borrowed: " + value);

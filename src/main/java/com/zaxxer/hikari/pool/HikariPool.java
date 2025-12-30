@@ -179,6 +179,7 @@ public final class HikariPool implements HikariPoolMBean, IBagStateListener {
     }
 
     /**
+     * <p>释放连接到池中。</p>
      * Release a connection back to the pool, or permanently close it if it is broken.
      *
      * @param connectionProxy the connection to release back to the pool
@@ -365,7 +366,9 @@ public final class HikariPool implements HikariPoolMBean, IBagStateListener {
             IHikariConnectionProxy proxyConnection = ProxyFactory.getProxyConnection(this, connection, configuration.getMaxLifetime(), transactionIsolation,
                     isAutoCommit, isReadOnly, catalog);
             proxyConnection.resetConnectionState();
-            connectionBag.add(proxyConnection);
+
+            connectionBag.add(proxyConnection); // 只有这一处添加的地方
+
             lastConnectionFailure.set(null);
             return true;
         } catch (Exception e) {

@@ -42,7 +42,9 @@ public abstract class ConnectionProxy implements IHikariConnectionProxy {
 
     private final FastList<Statement> openStatements;
     private final HikariPool parentPool;
+
     private final AtomicInteger state;
+
     private final String defaultCatalog;
     private final long expirationTime;
     private final int defaultIsolationLevel;
@@ -81,7 +83,8 @@ public abstract class ConnectionProxy implements IHikariConnectionProxy {
         this.defaultAutoCommit = defaultAutoCommit;
         this.defaultReadOnly = defaultReadOnly;
         this.defaultCatalog = defaultCatalog;
-        this.state = new AtomicInteger();
+
+        this.state = new AtomicInteger(); // 初始为0
 
         long now = System.currentTimeMillis();
         this.expirationTime = (maxLifetime > 0 ? now + maxLifetime : Long.MAX_VALUE);

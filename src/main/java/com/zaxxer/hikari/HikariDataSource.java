@@ -88,6 +88,7 @@ public class HikariDataSource extends HikariConfig implements DataSource {
         }
 
         // See http://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
+        // 连接池还未创建
         HikariPool result = pool;
         if (result == null) {
             synchronized (this) {
@@ -101,6 +102,7 @@ public class HikariDataSource extends HikariConfig implements DataSource {
             }
         }
 
+        // 连接池已创建
         return result.getConnection();
     }
 
