@@ -38,7 +38,7 @@ public abstract class ConnectionProxy implements IHikariConnectionProxy {
 
     private static final Set<String> SQL_ERRORS;
 
-    protected final Connection delegate;
+    protected final Connection delegate; // 目标连接
 
     private final FastList<Statement> openStatements;
     private final HikariPool parentPool;

@@ -42,8 +42,9 @@ import java.util.concurrent.locks.AbstractQueuedLongSynchronizer;
  * @author Brett Wooldridge
  */
 public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagManagable> {
-    public static final int STATE_NOT_IN_USE = 0;
+
     public static final int STATE_IN_USE = 1;
+    public static final int STATE_NOT_IN_USE = 0;
     private static final int STATE_REMOVED = -1;
     private static final int STATE_RESERVED = -2;
 
@@ -70,7 +71,7 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
     }
 
     private ThreadLocal<FastList<WeakReference<T>>> threadList;
-    private CopyOnWriteArraySet<T> sharedList;
+    private CopyOnWriteArraySet<T> sharedList; // 存放连接的容器。
     private Synchronizer synchronizer;
     private IBagStateListener listener;
 
@@ -94,6 +95,7 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
      * @throws InterruptedException if interrupted while waiting
      */
     public T borrow(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        // 1、先查本地
         // Try the thread-local list first
         FastList<WeakReference<T>> list = threadList.get();
         if (list == null) {
@@ -104,11 +106,12 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
                 final WeakReference<T> reference = list.removeLast();
                 final T element = reference.get();
                 if (element != null && element.compareAndSetState(STATE_NOT_IN_USE, STATE_IN_USE)) {
-                    return element;
+                    return element; // 这里是代理连接
                 }
             }
         }
 
+        // 2、再查共享
         // Otherwise, scan the shared list ... for maximum of timeout
         timeout = timeUnit.toNanos(timeout);
         do {
@@ -282,6 +285,7 @@ public class ConcurrentBag<T extends com.zaxxer.hikari.util.ConcurrentBag.IBagMa
     }
 
     /**
+     * <p>同步器</p>
      * Our private synchronizer that handles notify/wait type semantics.
      */
     private static class Synchronizer extends AbstractQueuedLongSynchronizer {

@@ -92,7 +92,7 @@ public class HikariDataSource extends HikariConfig implements DataSource {
         if (result == null) {
             synchronized (this) {
                 result = pool;
-                if (result == null) {
+                if (result == null) { // 双重检查
                     validate();
                     LOGGER.info("HikariCP pool {} is starting.", getPoolName());
                     pool = result = new HikariPool(this);
