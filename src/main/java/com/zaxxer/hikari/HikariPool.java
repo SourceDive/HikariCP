@@ -377,6 +377,7 @@ public final class HikariPool implements HikariPoolMBean {
     /**
      * <p>内务整理，相当于有个后台线程去处理内部的事务。</p>
      * <p>作用：非法连接剔除，向连接池中补充连接。</p>
+     * <p>管家。</p>
      * The house keeping task to retire idle and maxAge connections.
      */
     private class HouseKeeper extends TimerTask {
